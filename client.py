@@ -61,6 +61,7 @@ class GameServerChannel(asynchat.async_chat):
     def handle_close(self):
         asynchat.async_chat.handle_close(self)
         print 'Client: connection to server lost.'
+        sys.exit(0)
 
 def get_move(state):
     """Calculate the best move somehow."""
@@ -96,7 +97,7 @@ def get_move(state):
 
 
 if __name__=='__main__':
-    g = GameServerChannel(('lyra.lsc.phy.cam.ac.uk',1234))
+    g = GameServerChannel()
     g.Send('Team name\n\n')
     tick = None # when was the last update sent?
 
