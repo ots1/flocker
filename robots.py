@@ -61,12 +61,12 @@ class GameServer(Server):
     @staticmethod
     def state_to_string(player_state):
         state_string = str(player_state['time']) + '\n' 
-        state_string += ' '.join(str(n) for n in player_state['self']['pos']) + ' '
-        state_string += ' '.join(str(n) for n in player_state['self']['vel']) + ' '
+        state_string += str(p['pos'])[1:-1] + ' '
+        state_string += str(p['vel'])[1:-1] + ' '
         state_string += player_state['self']['team'] + '\n'
         for p in player_state['visible']:
-            state_string += ' '.join(str(n) for n in p['pos']) + ' '
-            state_string += ' '.join(str(n) for n in p['vel']) + ' '
+            state_string += str(p['pos'])[1:-1] + ' '
+            state_string += str(p['vel'])[1:-1] + ' '
             state_string += p['team'] + '\n'
         state_string += '\n'
         return state_string
