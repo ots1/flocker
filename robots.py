@@ -4,6 +4,7 @@ from time import sleep
 import pygame
 import sys
 import hashlib
+from functools import lru_cache
 #from lab2rgb import lab2rgb
 
 class PlayerChannel(Channel):
@@ -61,13 +62,8 @@ class GameServer(Server):
     @staticmethod
     def state_to_string(player_state):
         state_string = str(player_state['time']) + '\n' 
-        state_string += str(player_state['self']['pos'])[1:-1] + ' '
-        state_string += str(player_state['self']['vel'])[1:-1] + ' '
-        state_string += player_state['self']['team'] + '\n'
-        for p in player_state['visible']:
-            state_string += str(p['pos'])[1:-1] + ' '
-            state_string += str(p['vel'])[1:-1] + ' '
-            state_string += p['team'] + '\n'
+        state_string += player_state['self']
+        state_string += player_state['visible']
         state_string += '\n'
         return state_string
 
@@ -108,7 +104,7 @@ class World:
     def send_player_data(self):
         """Send each player information about it's current state and environment"""
         for k, p in self.players.iteritems():
-            p.to_send = {'time': self.tick, 'self': p.data.self_dict(), 'visible': [self.players[j].data.others_dict() for j in self.visible(k)]}
+            p.to_send = {'time': self.tick, 'self': p.data.self_string(), 'visible': '\n'.join(self.players[j].data.others_string() for j in self.visible(k)]}
 
     def visible(self, player_id):
         visible = self.players.copy() # copy
@@ -145,6 +141,8 @@ class World:
             
             # reset the player turn data
             p.turn = {}
+            p.self_string.clear_cache()
+            p.others_string.clear_cache()
 
         self.tick += 1
                 
@@ -163,6 +161,17 @@ class Robot:
     def others_dict(self):
         """Properties another robot can see"""
         return self.__dict__ # keep it simple for the moment
+
+    @lru_cache(maxsize=None)
+    def self_string(self):
+        self_str = ' '.join(str(n) for n in player_state['self']['pos']) + ' '
+        self_str += ' '.join(str(n) for n in player_state['self']['vel'])
+    
+    @lru_cache(maxsize=None)
+    def others_string(self):
+        self_str = ' '.join(str(n) for n in player_state['self']['pos']) + ' '
+        self_str += ' '.join(str(n) for n in player_state['self']['vel']) + ' '
+        self_str += self.team
 
 
 class Display:
